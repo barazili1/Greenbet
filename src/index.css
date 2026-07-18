@@ -1,0 +1,109 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+@theme {
+  --font-sans: "Cairo", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-orbitron: "Orbitron", sans-serif;
+  
+  --color-obsidian: #0A0A0A;
+  --color-crimson: #DC2626;
+  --color-crimson-light: #EF4444;
+  --color-crimson-dark: #991B1B;
+  
+  --color-hot-pink: #FF69B4;
+  --color-soft-pink: #FBCFE8;
+  --color-gold: #FFD700;
+}
+
+@keyframes rgb-neon {
+  0% { box-shadow: 0 0 15px rgba(220, 38, 38, 0.4), inset 0 0 10px rgba(220, 38, 38, 0.2); }
+  50% { box-shadow: 0 0 35px rgba(220, 38, 38, 0.8), inset 0 0 20px rgba(220, 38, 38, 0.4); }
+  100% { box-shadow: 0 0 15px rgba(220, 38, 38, 0.4), inset 0 0 10px rgba(220, 38, 38, 0.2); }
+}
+
+.rgb-animate {
+  animation: rgb-neon 3s infinite ease-in-out;
+}
+
+@layer base {
+  body {
+    @apply bg-obsidian text-white font-sans overflow-x-hidden;
+  }
+}
+
+.glass {
+  @apply bg-white/5 backdrop-blur-lg border border-white/10;
+}
+
+.red-glow {
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+}
+
+.red-glow-heavy {
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.5);
+}
+
+.pink-glow {
+  box-shadow: 0 0 25px rgba(236, 72, 153, 0.4);
+}
+
+.gold-text {
+  background: linear-gradient(to bottom, #FFD700, #B8860B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.neon-border {
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.2);
+}
+
+/* Hide video controls and overlays globally */
+video::-webkit-media-controls {
+  display: none !important;
+  -webkit-appearance: none;
+}
+video::-webkit-media-controls-start-indicator,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-toggle-closed-captions-button,
+video::-webkit-media-controls-enclosure {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
+/* Hide the big play button in the middle for iOS and some Android browsers */
+video::-webkit-media-controls-overlay-play-button {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  display: none !important;
+}
+
+video::-internal-media-controls-download-button {
+    display:none;
+}
+video::-webkit-media-controls-enclosure {
+    display:none !important;
+}
+
+/* For Firefox */
+video::-moz-media-controls {
+  display: none !important;
+}
+
+/* General safety for any media element */
+video {
+  outline: none;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
