@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "motion/react";
-import { Users, Play, RotateCcw, Compass, ShieldCheck, Cpu } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { Play, ShieldCheck, Cpu, Radio, Zap, RefreshCw, Terminal, TrendingUp } from "lucide-react";
 
 interface MainPredictionPageProps {
   userID: string;
@@ -11,10 +11,14 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
   const [onlineUsers, setOnlineUsers] = useState(1892);
   const [isScanning, setIsScanning] = useState(false);
   const [predictionMultiplier, setPredictionMultiplier] = useState("0.00x");
-  const [recentMultipliers, setRecentMultipliers] = useState<string[]>(["2.45x", "1.18x", "5.80x", "1.92x", "14.20x"]);
+  const [recentMultipliers, setRecentMultipliers] = useState<string[]>(["2.45x", "1.18x", "2.80x", "1.92x", "2.20x"]);
   
-  // Custom states for Aviator graphics
-  const [planeProgress, setPlaneProgress] = useState(0); // 0 to 100
+  // Simulated live signal feed to increase visual quality and realism
+  const [liveSignals, setLiveSignals] = useState<Array<{ id: string; mult: string; time: string; status: "success" | "pending" }>>([
+    { id: "ID: 489***3", mult: "2.10x", time: "الآن", status: "success" },
+    { id: "ID: 154***0", mult: "1.85x", time: "قبل دقيقة", status: "success" },
+    { id: "ID: 902***5", mult: "2.95x", time: "قبل دقيقتين", status: "success" }
+  ]);
 
   // Online Users Counter
   useEffect(() => {
@@ -25,6 +29,19 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
         return next < 1000 || next > 2500 ? prev : next;
       });
     }, 1200);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Update simulated signals list randomly
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomID = "ID: " + Math.floor(100 + Math.random() * 899) + "***" + Math.floor(0 + Math.random() * 9);
+      const randomMult = (1.00 + Math.random() * 2.00).toFixed(2) + "x";
+      setLiveSignals(prev => [
+        { id: randomID, mult: randomMult, time: "الآن", status: "success" },
+        ...prev.slice(0, 2)
+      ]);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -42,15 +59,14 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
     if (isScanning) return;
 
     setIsScanning(true);
-    setPlaneProgress(0);
     setPredictionMultiplier("1.00x");
 
-    // Generate random decimal between 1.00 and 3.00
+    // Generate random decimal between 1.00 and 3.00 as requested
     const randomVal = 1.00 + Math.random() * 2.00;
     const target = parseFloat(randomVal.toFixed(2));
 
-    const steps = 45;
-    const stepDuration = 35; // total ~1.5s for sleek transition
+    const steps = 40;
+    const stepDuration = 40; // total ~1.6s
     let currentStep = 0;
 
     if (animationIntervalRef.current) {
@@ -59,11 +75,9 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
 
     animationIntervalRef.current = setInterval(() => {
       currentStep++;
-      const progress = (currentStep / steps) * 100;
-      setPlaneProgress(progress);
 
       // Progressive multiplier count up
-      const currentMultiplierValue = 1.00 + (target - 1.00) * Math.pow(currentStep / steps, 1.5);
+      const currentMultiplierValue = 1.00 + (target - 1.00) * Math.pow(currentStep / steps, 1.4);
       setPredictionMultiplier(currentMultiplierValue.toFixed(2) + "x");
 
       if (currentStep >= steps) {
@@ -72,7 +86,6 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
         setIsScanning(false);
         setRecentMultipliers(prev => {
           const newMult = target.toFixed(2) + "x";
-          // Avoid immediate duplicate of the latest round in history
           if (prev[0] === newMult) return prev;
           return [newMult, ...prev.slice(0, 4)];
         });
@@ -81,237 +94,251 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
   };
 
   const formatSessionTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
+    const m = Math.floor(seconds / 60);
     const s = seconds % 60;
-    return { h, m, s };
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  const { h, m, s } = formatSessionTime(sessionTimeLeft);
-
-  const timeData = [
-    { label: "ساعة", val: h, max: 1 },
-    { label: "دقيقة", val: m, max: 60 },
-    { label: "ثانية", val: s, max: 60 }
-  ];
-
   return (
-    <div className="flex flex-col h-[100dvh] max-w-lg mx-auto bg-transparent overflow-hidden">
-      {/* Top Bar as requested: Users online on left, typed ID on right in Arabic/English */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/5 bg-obsidian/50 backdrop-blur-md sticky top-0 z-10">
-        {/* Left Side: Users online */}
-        <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-full border border-white/5">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[10px] text-white/50 uppercase font-bold">Users online</span>
-          <span className="text-[11px] font-mono font-bold text-white tracking-wider">{onlineUsers.toLocaleString()}</span>
-        </div>
+    <div className="flex flex-col h-[100dvh] max-w-lg mx-auto bg-transparent overflow-hidden select-none">
+      
+      {/* Decorative cyber backdrop */}
+      <div className="absolute inset-0 cyber-grid opacity-20 pointer-events-none" />
+      <div className="absolute inset-0 cyber-radial pointer-events-none" />
 
-        {/* Right Side: ID yang dtulis */}
-        <div className="text-right flex flex-col items-end">
-          <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-0.5">مُعرّف المستخدم</span>
-          <span className="text-sm font-black font-mono text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
-            ID: {userID || "Guest"}
+      {/* Top Header - Ultra compact high-end stats bar */}
+      <div className="flex items-center justify-between px-6 py-4.5 border-b border-white/5 bg-[#030a07]/60 backdrop-blur-md sticky top-0 z-50">
+        
+        {/* Left: Active online badge */}
+        <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[10px] font-black font-mono text-emerald-400 tracking-wider">
+            {onlineUsers.toLocaleString()} USERS_ONLINE
           </span>
         </div>
+
+        {/* Right: Authenticated User ID */}
+        <div className="text-right flex flex-col items-end">
+          <span className="text-[8px] font-black text-white/30 uppercase tracking-widest leading-none mb-1">المُعرّف المعتمد</span>
+          <div className="flex items-center gap-1.5 bg-white/[0.03] border border-white/5 py-1 px-2.5 rounded-lg">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-xs font-black font-mono text-white tracking-wide">ID: {userID || "Guest"}</span>
+          </div>
+        </div>
+
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24 space-y-4 scrollbar-hide">
+      {/* Main Body */}
+      <div className="flex-1 overflow-y-auto px-5 py-4 pb-24 space-y-5 scrollbar-hide relative z-10">
         
-        {/* Banner: هذا الاسكربت يعمل علي منصه greenbet للبروموكود A1111 */}
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-2xl bg-gradient-to-r from-red-950/40 via-red-900/20 to-transparent border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.05)] text-center relative overflow-hidden"
-        >
-          <div className="absolute right-0 top-0 bottom-0 w-1 bg-red-500" />
-          <p className="text-xs font-bold text-white/95 leading-relaxed text-center font-sans tracking-wide">
-            هذا الاسكربت يعمل علي منصه <span className="text-red-500 font-extrabold uppercase tracking-widest mx-1 relative">greenbet</span> للبروموكود <span className="text-red-400 font-black font-mono bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">A1111</span>
-          </p>
-        </motion.div>
+        {/* Top Ticker: هذا الاسكربت يعمل علي منصه greenbet للبروموكود A1111 */}
+        <div className="glass-premium rounded-2xl p-3.5 border border-emerald-500/15 relative overflow-hidden flex items-center justify-between">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />
+          
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-emerald-500/15 rounded-lg border border-emerald-500/20 text-emerald-400">
+              <Zap className="w-4 h-4 text-emerald-400" />
+            </div>
+            <p className="text-[11px] font-black text-white/90 text-right leading-relaxed pr-2">
+              نشط الآن لـ <span className="text-emerald-400 font-black">GREENBET</span> بكود VIP: <span className="text-emerald-300 font-black font-mono">A1111</span>
+            </p>
+          </div>
 
-        {/* Recent Rounds Multipliers Row (Immersive Aviator vibe) */}
-        <div className="flex flex-row-reverse items-center justify-between gap-1.5 py-1 px-1 overflow-x-auto scrollbar-hide">
-          <span className="text-[9px] font-black uppercase text-white/30 whitespace-nowrap">الجولات السابقة:</span>
-          <div className="flex gap-1.5 flex-row-reverse">
+          {/* Session Timer Badge - Styled cleanly as a countdown tag */}
+          <div className="bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 text-center font-mono">
+            <span className="text-[8px] text-emerald-400/60 font-black uppercase block leading-none mb-0.5">SESSION</span>
+            <span className="text-xs font-black text-white tracking-widest">{formatSessionTime(sessionTimeLeft)}</span>
+          </div>
+        </div>
+
+        {/* Recent Rounds - Redesigned to look like a high-end results tray */}
+        <div className="bg-obsidian/45 border border-white/5 rounded-2xl p-3 flex flex-row-reverse items-center justify-between gap-3">
+          <span className="text-[9px] font-black uppercase text-white/40 whitespace-nowrap">الجولات الفائتة:</span>
+          
+          <div className="flex gap-2 flex-row-reverse overflow-x-auto scrollbar-hide">
             {recentMultipliers.map((mult, id) => {
               const val = parseFloat(mult);
-              const isHigh = val >= 10;
-              const isMedium = val >= 2 && val < 10;
+              const isHigh = val >= 2.3;
               return (
-                <span 
+                <motion.span 
                   key={id} 
-                  className={`text-[9px] font-mono font-bold px-2 py-1 rounded-full border ${
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className={`text-[10px] font-mono font-black px-3 py-1 rounded-full border ${
                     isHigh 
-                      ? "bg-purple-950/40 border-purple-500/40 text-purple-400" 
-                      : isMedium 
-                      ? "bg-blue-950/40 border-blue-500/40 text-blue-400" 
-                      : "bg-red-950/40 border-red-500/40 text-red-400"
+                      ? "bg-emerald-500/10 border-emerald-500/35 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]" 
+                      : "bg-[#0b1c15] border-emerald-500/10 text-emerald-300/60"
                   }`}
                 >
                   {mult}
-                </span>
+                </motion.span>
               );
             })}
           </div>
         </div>
 
-        {/* Timer Section (3 High-End Cyber-Luxury RGB Circles) - Moved here (ABOVE prediction card) */}
-        <div className="py-2">
-          <div className="flex justify-center gap-4 py-1 px-2">
-            {timeData.map((data, i) => (
-              <div 
-                key={i} 
-                className="flex flex-col items-center gap-3 flex-1"
-              >
-                <div className="relative w-full aspect-square max-w-[80px] flex items-center justify-center rounded-full">
-                  
-                  {/* Glowing RGB Background loop */}
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.25, 1],
-                      opacity: [0.15, 0.4, 0.15],
-                      backgroundColor: ["rgba(239,68,68,0.15)", "rgba(185,28,28,0.25)", "rgba(239,68,68,0.15)"]
-                    }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-0 rounded-full blur-2xl"
-                  />
+        {/* Circular HUD Target Display - Completely unique, highly aesthetic */}
+        <div className="flex justify-center py-4 relative">
+          
+          {/* Pulsing radar backgrounds */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/[0.03] rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="relative w-60 h-60 flex items-center justify-center">
+            
+            {/* Outer dotted tech ring */}
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 rounded-full border border-dashed border-emerald-500/25"
+            />
 
-                  {/* Flight radar rotating beam */}
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-0 rounded-full border border-dashed border-red-500/30"
-                  />
+            {/* Middle telemetry ticks ring */}
+            <motion.div 
+              animate={{ rotate: -360 }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-3 rounded-full border border-emerald-500/15"
+              style={{
+                backgroundImage: "conic-gradient(from 0deg, rgba(16,185,129,0.1) 0deg, transparent 45deg, rgba(16,185,129,0.1) 90deg, transparent 135deg)"
+              }}
+            />
 
-                  <svg className="w-full h-full -rotate-90 relative z-10 p-1.5">
-                    <defs>
-                      <linearGradient id={`gradient-red-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#ef4444" />
-                        <stop offset="100%" stopColor="#b91c1c" />
-                      </linearGradient>
-                    </defs>
-                    <circle
-                      cx="50%"
-                      cy="50%"
-                      r="40%"
-                      stroke="rgba(255,255,255,0.05)"
-                      strokeWidth="2"
-                      fill="transparent"
-                    />
-                    <motion.circle
-                      cx="50%"
-                      cy="50%"
-                      r="40%"
-                      stroke={`url(#gradient-red-${i})`}
-                      strokeWidth="4"
-                      strokeDasharray="250"
-                      animate={{ 
-                        strokeDashoffset: 250 - (data.val / data.max) * 250,
-                      }}
-                      transition={{ 
-                        strokeDashoffset: { duration: 1, ease: "linear" }
-                      }}
-                      fill="transparent"
-                      strokeLinecap="round"
-                      className="drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                    />
-                  </svg>
+            {/* Dynamic radar scanning sweeper */}
+            {isScanning && (
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 rounded-full z-10 pointer-events-none"
+                style={{
+                  background: "conic-gradient(from 0deg, rgba(16,185,129,0.2) 0deg, transparent 90deg)"
+                }}
+              />
+            )}
 
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                      <span className="text-[8px] font-black text-red-500 uppercase mb-0.5 tracking-wider">
-                        {data.label[0]}
-                      </span>
-                      <span className="text-lg md:text-xl font-orbitron font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.4)] tracking-tighter">
-                          {data.val.toString().padStart(2, "0")}
-                      </span>
-                  </div>
-                </div>
-                <span className="text-[8px] font-black text-white/40 uppercase font-orbitron">{data.label}</span>
+            {/* Inner primary card circle */}
+            <div className="absolute inset-6 rounded-full bg-[#030e0a]/80 border-2 border-emerald-500/30 flex flex-col items-center justify-center z-20 shadow-[0_0_35px_rgba(16,185,129,0.2),inset_0_0_20px_rgba(16,185,129,0.15)] overflow-hidden">
+              
+              {/* Dynamic glowing neon line */}
+              <div className="absolute top-4 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+              <div className="absolute bottom-4 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+
+              {/* Ticker labels */}
+              <span className="text-[9px] font-black tracking-[0.2em] text-emerald-400/80 uppercase font-orbitron mb-2.5">
+                {isScanning ? "DECODING_LIVE" : "LIVE SIGNAL"}
+              </span>
+
+              {/* Main big value display */}
+              <div className="text-4xl md:text-5xl font-black font-orbitron text-white tracking-wider drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">
+                {predictionMultiplier}
               </div>
-            ))}
+
+              {/* Status footer pill */}
+              <div className="mt-3">
+                <AnimatePresence mode="wait">
+                  {isScanning ? (
+                    <motion.span 
+                      key="active"
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className="text-[9px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full animate-pulse"
+                    >
+                      جاري القراءة الفورية
+                    </motion.span>
+                  ) : (
+                    <motion.span 
+                      key="standby"
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className="text-[9px] font-black uppercase text-white/50 bg-white/5 border border-white/10 px-3 py-1 rounded-full"
+                    >
+                      نظام التوقع جاهز
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
+
+            </div>
+
           </div>
         </div>
 
-        {/* Requested Red Rounded Transparent Box with format 0.00x inside - Fully automated real-time prediction card */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className={`border-2 border-red-500 rounded-[2.5rem] bg-transparent p-10 text-center shadow-[0_0_35px_rgba(239,68,68,0.15)] flex flex-col items-center justify-center min-h-[180px] relative transition-all duration-500 overflow-hidden ${
-            isScanning ? "border-red-400 shadow-[0_0_40px_rgba(239,68,68,0.25)]" : ""
-          }`}
-        >
-          <div className="absolute top-4 left-6 text-red-500/20 font-mono text-[8px]">SYS_LOCK</div>
-          <div className="absolute bottom-4 right-6 text-red-500/20 font-mono text-[8px]">LIMIT: 100%</div>
-
-          <span className="text-[10px] font-black uppercase text-red-400/70 tracking-[0.25em] mb-3">
-            {isScanning ? "جاري التوقع المباشر..." : "نسبة التوقع المباشر"}
-          </span>
-          
-          <div className="text-5xl md:text-6xl font-black font-mono text-red-500 tracking-widest font-orbitron drop-shadow-[0_0_20px_rgba(239,68,68,0.7)]">
-            {predictionMultiplier}
-          </div>
-
-          {/* Status Indicator */}
-          {isScanning ? (
-            <div className="flex items-center gap-2 mt-4 px-4 py-1.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 animate-pulse text-[11px] font-bold">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              جاري معالجة الإشارة...
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 mt-4 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-              جاهز لبدء التوقع المباشر
-            </div>
-          )}
-
-          {/* Real-time scan laser overlay */}
-          {isScanning && (
-            <motion.div 
-              animate={{ y: ["-100%", "100%"] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_10px_rgba(239,68,68,0.8)]"
-            />
-          )}
-        </motion.div>
-
-        {/* Start Prediction Button */}
-        <div className="pt-2">
+        {/* Activation Launcher Button - Sleek tactile trigger */}
+        <div className="pt-1">
           <button
             onClick={handleStartPrediction}
             disabled={isScanning}
-            className="w-full py-5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 active:scale-[0.98] disabled:opacity-50 disabled:scale-100 disabled:pointer-events-none transition-all rounded-2xl font-black text-white text-base tracking-wider red-glow flex items-center justify-center gap-3 uppercase shadow-[0_0_20px_rgba(239,68,68,0.2)]"
+            className="w-full py-5 bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 hover:from-emerald-500 hover:to-emerald-400 active:scale-[0.98] disabled:opacity-30 disabled:scale-100 disabled:pointer-events-none transition-all duration-300 rounded-2xl font-black text-white text-base tracking-wider flex items-center justify-center gap-3 shadow-lg emerald-glow cursor-pointer"
           >
             {isScanning ? (
               <>
-                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                <span>جاري استخراج التوقع...</span>
+                <RefreshCw className="w-5 h-5 animate-spin" />
+                <span>جاري معالجة الإشارة الرقمية...</span>
               </>
             ) : (
               <>
-                <Play className="w-5 h-5 fill-current" />
-                <span>ابدأ التوقع (START)</span>
+                <Play className="w-5 h-5 fill-current text-emerald-100 animate-pulse" />
+                <span>تنشيط الاستعلام الفوري (START)</span>
               </>
             )}
           </button>
         </div>
 
-        {/* Live Security Verification & Guarantee Feed */}
-        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
-              <ShieldCheck className="w-4 h-4 text-red-500" />
+        {/* Real-time Decrypted Database Feed Panel - Extremely high-end aesthetic */}
+        <div className="glass-premium rounded-2.5rem p-5 border border-white/[0.05] space-y-4">
+          
+          <div className="flex flex-row-reverse items-center justify-between pb-3 border-b border-white/5">
+            <div className="flex flex-row-reverse items-center gap-2">
+              <Terminal className="w-4 h-4 text-emerald-400" />
+              <h4 className="text-xs font-black text-white">إشارات تم فك تشفيرها فتاكة</h4>
             </div>
-            <div className="text-left">
-              <h4 className="text-[11px] font-bold text-white/90">تشفير إرسال آمن</h4>
-              <p className="text-[9px] text-white/40">بروتوكول التحقق الثنائي العسكري</p>
+            <div className="flex items-center gap-1.5 text-[8px] font-black text-emerald-400/80 uppercase tracking-widest font-orbitron">
+              <Radio className="w-3 h-3 text-emerald-400 animate-ping" />
+              <span>LIVE_STREAMS</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-red-500/50" />
-            <span className="text-[9.5px] font-mono font-bold text-white/30">CPU: 99.8%</span>
+
+          {/* Dynamic Feed list */}
+          <div className="space-y-2.5">
+            {liveSignals.map((sig, idx) => (
+              <motion.div 
+                key={idx}
+                layout
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-row-reverse items-center justify-between p-3 bg-obsidian/40 border border-white/5 rounded-xl text-[11px] font-semibold"
+              >
+                <div className="flex flex-row-reverse items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-white/70 font-mono">{sig.id}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-white/30">{sig.time}</span>
+                  <span className="text-emerald-400 font-mono font-black bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                    {sig.mult}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+        </div>
+
+        {/* Bottom security assurance block */}
+        <div className="p-4 bg-white/[0.01] border border-white/5 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/25">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="text-right">
+              <h4 className="text-[10px] font-black text-white/90">تشفير إرسال آمن للطرفين</h4>
+              <p className="text-[9px] text-white/40 leading-none">تأمين لوحة البيانات SSL v3</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 font-mono text-[9px] font-bold text-white/20">
+            <Cpu className="w-3.5 h-3.5" />
+            <span>CORE: OK</span>
           </div>
         </div>
 

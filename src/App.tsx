@@ -10,12 +10,12 @@ import LoginPage from "./components/LoginPage";
 import ConditionPage from "./components/ConditionPage";
 import KeyGenPage from "./components/KeyGenPage";
 import MainPredictionPage from "./components/MainPredictionPage";
-import BackgroundVideo from "./components/BackgroundVideo";
+import ParticleBackground from "./components/ParticleBackground";
 
 export type Screen = "splash" | "login" | "condition" | "keygen" | "main";
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("login");
+  const [screen, setScreen] = useState<Screen>("splash");
   const [userID, setUserID] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [generatedKey, setGeneratedKey] = useState<string>("");
@@ -46,8 +46,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-obsidian text-white overflow-hidden selection:bg-crimson selection:text-white relative">
-      <BackgroundVideo />
+    <div className="min-h-screen bg-[#010603] text-white overflow-hidden selection:bg-emerald-600 selection:text-white relative">
+      <ParticleBackground />
       
       <div className="relative z-10 w-full h-full">
         <AnimatePresence mode="wait">
@@ -59,7 +59,7 @@ export default function App() {
               transition={{ duration: 0.5 }}
               className="fixed inset-0 z-50 bg-transparent"
             >
-              <SplashScreen onComplete={() => setScreen("login")} />
+              <SplashScreen onComplete={() => setScreen("condition")} />
             </motion.div>
           )}
 
