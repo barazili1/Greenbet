@@ -89,7 +89,7 @@ export default function LoginPage({ onNavigate, passwordValue, onPasswordChange,
         >
           <div className="absolute inset-0 bg-red-500/20 blur-[30px] opacity-40 rounded-full" />
           <img 
-            src="https://cdn.phototourl.com/free/2026-07-18-43d46ecc-bef3-4136-9a26-d9baabe0a6a6.jpg" 
+            src="https://cdn.phototourl.com/free/2026-07-18-da63e062-21e9-4c53-8e89-1966d3a044d4.png" 
             alt="Logo" 
             className="w-20 h-20 rounded-2xl object-cover relative z-10 border border-red-500/20 mx-auto drop-shadow-xl"
           />

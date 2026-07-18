@@ -230,7 +230,7 @@ export default function ConditionPage({ onNavigate, onSetUserID }: ConditionPage
                 </motion.div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <img 
-                    src="https://cdn.phototourl.com/free/2026-07-18-43d46ecc-bef3-4136-9a26-d9baabe0a6a6.jpg" 
+                    src="https://cdn.phototourl.com/free/2026-07-18-da63e062-21e9-4c53-8e89-1966d3a044d4.png" 
                     alt="Logo" 
                     className="w-10 h-10 rounded-full object-cover relative z-10"
                   />

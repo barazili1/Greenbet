@@ -55,7 +55,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
             <div className="relative">
               <div className="absolute inset-0 bg-red-500/30 blur-[30px] rounded-full animate-pulse" />
               <img 
-                src="https://cdn.phototourl.com/free/2026-07-18-43d46ecc-bef3-4136-9a26-d9baabe0a6a6.jpg" 
+                src="https://cdn.phototourl.com/free/2026-07-18-da63e062-21e9-4c53-8e89-1966d3a044d4.png" 
                 alt="Logo" 
                 className="w-20 h-20 rounded-2xl object-cover relative z-10 border-2 border-red-500/30"
               />
@@ -96,7 +96,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
               >
                 <div className="absolute inset-0 bg-red-500/30 blur-[40px] opacity-60 rounded-full" />
                 <img 
-                  src="https://cdn.phototourl.com/free/2026-07-18-43d46ecc-bef3-4136-9a26-d9baabe0a6a6.jpg" 
+                  src="https://cdn.phototourl.com/free/2026-07-18-da63e062-21e9-4c53-8e89-1966d3a044d4.png" 
                   alt="Greenbet Logo" 
                   className="w-24 h-24 rounded-3xl object-cover relative z-10 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] border-2 border-red-500/30"
                 />
