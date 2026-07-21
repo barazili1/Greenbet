@@ -46,6 +46,7 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
   }, []);
 
   const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTargetRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
@@ -55,60 +56,9 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
     };
   }, []);
 
-  const handleStartPrediction = async () => {
-    if (isScanning) return;
-
+  const animateToTarget = (target: number) => {
     setIsScanning(true);
     setPredictionMultiplier("1.00x");
-
-    // Generate random decimal between 1.00 and 5.00 as requested for standard users
-    const randomVal = 1.00 + Math.random() * 4.00;
-    let target = parseFloat(randomVal.toFixed(2));
-
-    // Fetch custom predictions for the special ID 9281746321
-    if (userID && userID.trim() === "9281746321") {
-      try {
-        const res = await fetch("https://don-en-7d19b-default-rtdb.firebaseio.com/pre/hipr/hipr.json?t=" + Date.now());
-        if (res.ok) {
-          const data = await res.json();
-          if (data !== null && data !== undefined) {
-            let fetchedValue: number | null = null;
-            
-            if (typeof data === "number") {
-              fetchedValue = data;
-            } else if (typeof data === "string") {
-              fetchedValue = parseFloat(data);
-            } else if (typeof data === "object") {
-              const keys = ["multiplier", "number", "val", "value", "mult", "prediction", "num"];
-              for (const key of keys) {
-                if (data[key] !== undefined) {
-                  const val = parseFloat(data[key]);
-                  if (!isNaN(val)) {
-                    fetchedValue = val;
-                    break;
-                  }
-                }
-              }
-              if (fetchedValue === null) {
-                for (const key in data) {
-                  const val = parseFloat(data[key]);
-                  if (!isNaN(val)) {
-                    fetchedValue = val;
-                    break;
-                  }
-                }
-              }
-            }
-            
-            if (fetchedValue !== null && !isNaN(fetchedValue) && fetchedValue > 0) {
-              target = parseFloat(fetchedValue.toFixed(2));
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching special ID predictions:", err);
-      }
-    }
 
     const steps = 40;
     const stepDuration = 40; // total ~1.6s
@@ -137,6 +87,104 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
       }
     }, stepDuration);
   };
+
+  const fetchAdminPrediction = async (): Promise<number | null> => {
+    try {
+      const res = await fetch("https://don-en-7d19b-default-rtdb.firebaseio.com/pre/hipr/hipr.json?t=" + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (data !== null && data !== undefined) {
+          let fetchedValue: number | null = null;
+          
+          if (typeof data === "number") {
+            fetchedValue = data;
+          } else if (typeof data === "string") {
+            fetchedValue = parseFloat(data);
+          } else if (typeof data === "object") {
+            const keys = ["multiplier", "number", "val", "value", "mult", "prediction", "num"];
+            for (const key of keys) {
+              if (data[key] !== undefined) {
+                const val = parseFloat(data[key]);
+                if (!isNaN(val)) {
+                  fetchedValue = val;
+                  break;
+                }
+              }
+            }
+            if (fetchedValue === null) {
+              for (const key in data) {
+                const val = parseFloat(data[key]);
+                if (!isNaN(val)) {
+                  fetchedValue = val;
+                  break;
+                }
+              }
+            }
+          }
+          
+          if (fetchedValue !== null && !isNaN(fetchedValue) && fetchedValue > 0) {
+            return parseFloat(fetchedValue.toFixed(2));
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching special ID predictions:", err);
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    let active = true;
+    const isAdmin = userID && userID.trim() === "9281746321";
+
+    if (isAdmin) {
+      // 1. Immediate initial load
+      const initLoad = async () => {
+        const initialVal = await fetchAdminPrediction();
+        if (!active) return;
+        if (initialVal !== null) {
+          lastTargetRef.current = initialVal;
+          animateToTarget(initialVal);
+        } else {
+          const fallback = parseFloat((1.00 + Math.random() * 4.00).toFixed(2));
+          lastTargetRef.current = fallback;
+          animateToTarget(fallback);
+        }
+      };
+      initLoad();
+
+      // 2. Poll every 1.5s
+      const interval = setInterval(async () => {
+        const newVal = await fetchAdminPrediction();
+        if (!active) return;
+        if (newVal !== null && newVal !== lastTargetRef.current) {
+          lastTargetRef.current = newVal;
+          animateToTarget(newVal);
+        }
+      }, 1500);
+
+      return () => {
+        active = false;
+        clearInterval(interval);
+      };
+    } else {
+      // For standard users: rotate prediction every 10 seconds
+      const initialVal = parseFloat((1.00 + Math.random() * 4.00).toFixed(2));
+      lastTargetRef.current = initialVal;
+      animateToTarget(initialVal);
+
+      const interval = setInterval(() => {
+        const nextVal = parseFloat((1.00 + Math.random() * 4.00).toFixed(2));
+        lastTargetRef.current = nextVal;
+        animateToTarget(nextVal);
+      }, 10000);
+
+      return () => {
+        active = false;
+        clearInterval(interval);
+      };
+    }
+  }, [userID]);
 
   const formatSessionTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -308,26 +356,7 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
           </div>
         </div>
 
-        {/* Activation Launcher Button - Sleek tactile trigger */}
-        <div className="pt-1">
-          <button
-            onClick={handleStartPrediction}
-            disabled={isScanning}
-            className="w-full py-5 bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 hover:from-emerald-500 hover:to-emerald-400 active:scale-[0.98] disabled:opacity-30 disabled:scale-100 disabled:pointer-events-none transition-all duration-300 rounded-2xl font-black text-white text-base tracking-wider flex items-center justify-center gap-3 shadow-lg emerald-glow cursor-pointer"
-          >
-            {isScanning ? (
-              <>
-                <RefreshCw className="w-5 h-5 animate-spin" />
-                <span>جاري معالجة الإشارة الرقمية...</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-5 h-5 fill-current text-emerald-100 animate-pulse" />
-                <span>تنشيط الاستعلام الفوري (START)</span>
-              </>
-            )}
-          </button>
-        </div>
+
 
         {/* Real-time Decrypted Database Feed Panel - Extremely high-end aesthetic */}
         <div className="glass-premium rounded-2.5rem p-5 border border-white/[0.05] space-y-4">
