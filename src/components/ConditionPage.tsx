@@ -138,7 +138,7 @@ export default function ConditionPage({ onNavigate, onSetUserID }: ConditionPage
           </p>
 
           <button 
-            onClick={() => window.open("https://refpa79184.com/L?tag=d_5828346m_132250c_&site=5828346&ad=132250", "_blank", "noopener,noreferrer")}
+            onClick={() => window.open("https://refpa79184.com/L?tag=d_5828346m_188307c_&site=5828346&ad=188307", "_blank", "noopener,noreferrer")}
             className="w-full flex flex-row-reverse items-center justify-between p-4 bg-emerald-500/5 hover:bg-emerald-500/10 active:scale-[0.99] rounded-2xl border border-emerald-500/20 cursor-pointer transition-all duration-300 group"
           >
             <div className="flex flex-row-reverse items-center gap-3">

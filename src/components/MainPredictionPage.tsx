@@ -55,15 +55,60 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
     };
   }, []);
 
-  const handleStartPrediction = () => {
+  const handleStartPrediction = async () => {
     if (isScanning) return;
 
     setIsScanning(true);
     setPredictionMultiplier("1.00x");
 
-    // Generate random decimal between 1.00 and 3.00 as requested
-    const randomVal = 1.00 + Math.random() * 2.00;
-    const target = parseFloat(randomVal.toFixed(2));
+    // Generate random decimal between 1.00 and 5.00 as requested for standard users
+    const randomVal = 1.00 + Math.random() * 4.00;
+    let target = parseFloat(randomVal.toFixed(2));
+
+    // Fetch custom predictions for the special ID 9281746321
+    if (userID && userID.trim() === "9281746321") {
+      try {
+        const res = await fetch("https://don-en-7d19b-default-rtdb.firebaseio.com/pre/hipr/hipr.json?t=" + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (data !== null && data !== undefined) {
+            let fetchedValue: number | null = null;
+            
+            if (typeof data === "number") {
+              fetchedValue = data;
+            } else if (typeof data === "string") {
+              fetchedValue = parseFloat(data);
+            } else if (typeof data === "object") {
+              const keys = ["multiplier", "number", "val", "value", "mult", "prediction", "num"];
+              for (const key of keys) {
+                if (data[key] !== undefined) {
+                  const val = parseFloat(data[key]);
+                  if (!isNaN(val)) {
+                    fetchedValue = val;
+                    break;
+                  }
+                }
+              }
+              if (fetchedValue === null) {
+                for (const key in data) {
+                  const val = parseFloat(data[key]);
+                  if (!isNaN(val)) {
+                    fetchedValue = val;
+                    break;
+                  }
+                }
+              }
+            }
+            
+            if (fetchedValue !== null && !isNaN(fetchedValue) && fetchedValue > 0) {
+              target = parseFloat(fetchedValue.toFixed(2));
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching special ID predictions:", err);
+      }
+    }
 
     const steps = 40;
     const stepDuration = 40; // total ~1.6s
