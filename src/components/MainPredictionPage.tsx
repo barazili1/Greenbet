@@ -135,55 +135,36 @@ export default function MainPredictionPage({ userID, sessionTimeLeft }: MainPred
 
   useEffect(() => {
     let active = true;
-    const isAdmin = userID && userID.trim() === "9281746321";
 
-    if (isAdmin) {
-      // 1. Immediate initial load
-      const initLoad = async () => {
-        const initialVal = await fetchAdminPrediction();
-        if (!active) return;
-        if (initialVal !== null) {
-          lastTargetRef.current = initialVal;
-          animateToTarget(initialVal);
-        } else {
-          const fallback = parseFloat((1.00 + Math.random() * 4.00).toFixed(2));
-          lastTargetRef.current = fallback;
-          animateToTarget(fallback);
-        }
-      };
-      initLoad();
+    // 1. Immediate initial load
+    const initLoad = async () => {
+      const initialVal = await fetchAdminPrediction();
+      if (!active) return;
+      if (initialVal !== null) {
+        lastTargetRef.current = initialVal;
+        animateToTarget(initialVal);
+      } else {
+        const fallback = parseFloat((1.00 + Math.random() * 4.00).toFixed(2));
+        lastTargetRef.current = fallback;
+        animateToTarget(fallback);
+      }
+    };
+    initLoad();
 
-      // 2. Poll every 1.5s
-      const interval = setInterval(async () => {
-        const newVal = await fetchAdminPrediction();
-        if (!active) return;
-        if (newVal !== null && newVal !== lastTargetRef.current) {
-          lastTargetRef.current = newVal;
-          animateToTarget(newVal);
-        }
-      }, 1500);
+    // 2. Poll every 1.5s to listen to any immediate changes on the Firebase Realtime Database
+    const interval = setInterval(async () => {
+      const newVal = await fetchAdminPrediction();
+      if (!active) return;
+      if (newVal !== null && newVal !== lastTargetRef.current) {
+        lastTargetRef.current = newVal;
+        animateToTarget(newVal);
+      }
+    }, 1500);
 
-      return () => {
-        active = false;
-        clearInterval(interval);
-      };
-    } else {
-      // For standard users: rotate prediction every 10 seconds
-      const initialVal = parseFloat((1.00 + Math.random() * 4.00).toFixed(2));
-      lastTargetRef.current = initialVal;
-      animateToTarget(initialVal);
-
-      const interval = setInterval(() => {
-        const nextVal = parseFloat((1.00 + Math.random() * 4.00).toFixed(2));
-        lastTargetRef.current = nextVal;
-        animateToTarget(nextVal);
-      }, 10000);
-
-      return () => {
-        active = false;
-        clearInterval(interval);
-      };
-    }
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [userID]);
 
   const formatSessionTime = (seconds: number) => {
